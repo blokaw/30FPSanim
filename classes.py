@@ -3,7 +3,7 @@
  [+] Duration class
  [+] TimingRange class
  [+] ValueRange class
- [-] KfProperty class
+ [+] KfProperty class
 '''
 
 class Duration:
