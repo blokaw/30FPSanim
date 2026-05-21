@@ -87,9 +87,9 @@ if __name__ == '__main__':
     Prop2 = KfProperty("position", "%spx, %spx, %spx", [0.0, 58.0, 0.0], [0.0, 100.0, 0.0])
 
     fr = generateKeyframes(
-        duration = Duration(2.9), 
+        duration = Duration(0.5), 
         props = [Prop1, Prop2],
-        timing = TimingRange(0.0, 8.0), 
+        timing = TimingRange(0.0, 100.0), 
         timingFunc = linear
         )
    
