@@ -1,3 +1,5 @@
 trashbin/
 __pycache__/
 .vscode/
+build/
+main.spec

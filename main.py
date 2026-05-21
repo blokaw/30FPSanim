@@ -20,14 +20,32 @@ timingFuncDict = {
     "3": easeInOutSine,
 }
 
-def readLocalFile(path = "css/keyframes.css"):
-    with open(path, 'r') as file:
-        return file.read()
+import sys
+import os
+
+def get_exe_dir():
+    """Возвращает папку, где находится запущенный .exe файл"""
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+def readLocalFile(path="css/keyframes.css"):
+    base_dir = get_exe_dir()
+    full_path = os.path.join(base_dir, path)
     
-def saveFile(data: str, style, path = "css/30FPSkeyframes.css"):
-    with open("css/30FPSkeyframes.css", "w") as file:
+    with open(full_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
+def saveFile(data: list[str], style, path="css/30FPSkeyframes.css"):
+    base_dir = get_exe_dir()
+    full_path = os.path.join(base_dir, path)
+    
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    
+    with open(full_path, "w", encoding='utf-8') as file:
         file.write(
-            data.replace("  ", "").replace("\n", "") if style == "flat" else data
+            "\n".join(x.replace("  ", "").replace("\n", "") for x in data) if style == "flat" else data
         )
 
 def compareProps(kfs, kf1, kf2) -> list[KfProperty]:
@@ -53,71 +71,64 @@ def compareProps(kfs, kf1, kf2) -> list[KfProperty]:
     return DIFF if NEW_VAL else []
 
 
-def build30FPSKeyframes(_duration, _timingFunction):
+def build30FPSKeyframes(kf, _duration, _timingFunction):
     keyframes = {}
-
-    print("[0] Reading and parsing keyframes.css...\n")
-    _kfStr =    readLocalFile()
-    _kf =       parseKeyframes(_kfStr)
     
-    _kfName =   next(iter(_kf))
-    _kfFramesIter = iter(_kf[_kfName])
+    kfFramesIter = iter(kf)
 
-    print("[1] Comparing frames...")
-    _prevKf = next(_kfFramesIter, None)
-    _currKf = next(_kfFramesIter, None)
+    prevKf = next(kfFramesIter, None)
+    currKf = next(kfFramesIter, None)
     print("===================================")
-    while _currKf is not None:
-        comparedProps = compareProps(_kf[_kfName], _prevKf, _currKf)
+    while currKf is not None:
+        comparedProps = compareProps(kf, prevKf, currKf)
 
-        print(f"[i] {_prevKf}% -> {_currKf}%")
+        print(f"[i] {prevKf}% -> {currKf}%")
         if len(comparedProps) > 0:
             print(" > Generating frames...")
             keyframes.update(generateKeyframes(
                 Duration(_duration), 
                 comparedProps, 
-                TimingRange(_prevKf, _currKf), 
+                TimingRange(prevKf, currKf), 
                 timingFuncDict[_timingFunction]
             ))
         else:
             print(" > No transition.")
 
-        _prevKf, _currKf = _currKf, next(_kfFramesIter, None)
+        prevKf, currKf = currKf, next(kfFramesIter, None)
     print("===================================")
-    return {_kfName: keyframes}
+    return keyframes
     
 def run():
     os.system('cls')
-    if len(sys.argv) < 3:
-        print("[!] Missing arguments.")
-        return
+
+    print("[0] Reading and parsing keyframes.css...\n")
+    kfStr =    readLocalFile()
+    kf =       parseKeyframes(kfStr)
+
+    print(f"[i] Animations found > {len(kf)}\n")
+
+    cfg = parseAnimationConfig(kfStr)
+
+    data = []
+
+    for name in cfg:
+        print(f"[1] Comparing frames for {name}...")
+
+        new_kf = {name: build30FPSKeyframes(kf[name], cfg[name]["duration"], cfg[name]["timingFunction"])}
+
+        print("[2] Saving new keyframes...\n")
+
+        data.append(buildKeyframes(new_kf))
     
-    dur = 0
-    tF = sys.argv[2]
-    style = "normal"
-    if len(sys.argv) >= 4:
-        if sys.argv[3] in ["normal", "flat"]:
-            style = sys.argv[3]
-        else:
-            print("[!] Problems with parsing style.\n\n\n")
+    if data == []:
+        print("[i] Nothing was saved. Add animations and run the script again.")
+    else:
+        saveFile(data, cfg[name]["style"])
 
-    try:
-        dur = float(sys.argv[1])
-    except ValueError:
-        print("[!] Problems with parsing duration.\n\n\n")
-        return
-    
-    if tF not in timingFuncDict:
-        print("[!] Wrong timing function.\n\n\n")
-        return
+        print("[3] Done! See in 30FPSkeyframes.css\n\n\n")
 
-    kf = build30FPSKeyframes(dur, tF)
-
-    print("[2] Saving new keyframes...\n")
-
-    saveFile(buildKeyframes(kf), style)
-
-    print("[3] Done! See in 30FPSkeyframes.css\n\n\n")
+    if getattr(sys, 'frozen', False):
+        input("Press Enter...")
 
 
 if __name__ == '__main__':

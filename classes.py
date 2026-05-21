@@ -7,7 +7,7 @@
 '''
 
 class Duration:
-    FPS = 30
+    FPS = 10
     def __init__(self, seconds):
         self._seconds = seconds
         self._frames = seconds * self.FPS

@@ -6,15 +6,52 @@
 # CAN BE DONE IN FEW MINUTES                                #
 # ========================================================  #
 # SHORT DOC                                                 #
-# parseKeyframes(text: str) -> JSON: kf string to JSON     #
-# buildKeyframes(data: JSON) -> str: kf JSON to string  #
+# parseAnimationConfig(text: str) -> JSON: kf metadata      #
+# parseKeyframes(text: str) -> JSON: kf string to JSON      #
+# buildKeyframes(data: JSON) -> str: kf JSON to string      #
 # ========================================================  #
 #                                                           #
 
-__all__ = ["parseKeyframes", "buildKeyframes"]
+__all__ = ["parseKeyframes", "buildKeyframes", "parseAnimationConfig"]
 
 import re
 from collections import OrderedDict
+
+
+def parseAnimationConfig(text):
+    """
+    Парсит конфигурацию анимаций из комментариев.
+    Возвращает словарь с настройками для каждой анимации.
+    """
+    config = OrderedDict()
+    
+    # Находим все блоки комментариев /* ... */
+    comment_pattern = r'/\*(.*?)\*/'
+    comments = re.findall(comment_pattern, text, flags=re.DOTALL)
+    
+    for comment in comments:
+        # Ищем строки вида: anim-name: duration timing-function style
+        lines = comment.strip().split('\n')
+        for line in lines:
+            line = line.strip()
+            # Паттерн: имя-анимации: число функция стиль
+            match = re.match(
+                r'([\w-]+)\s*:\s*([\d.]+)\s+([\w-]+)\s+(\w+)',
+                line
+            )
+            if match:
+                anim_name = match.group(1)
+                duration = float(match.group(2))
+                timing_func = match.group(3)
+                style = match.group(4)
+                
+                config[anim_name] = OrderedDict([
+                    ("duration", duration),
+                    ("timingFunction", timing_func),
+                    ("style", style)
+                ])
+    
+    return config
 
 
 def parseKeyframes(text):
@@ -204,7 +241,12 @@ def apply_mask(values, mask):
 
 # Тестируем
 if __name__ == "__main__":
-    input_text = '''@keyframes anim
+    input_text = '''/*
+    money-anim__remove: 2.9 ease-in-out flat
+    money-anim__add: 2.9 ease-in-out flat
+*/
+
+@keyframes money-anim__remove
 {
     0%
     {
@@ -214,26 +256,56 @@ if __name__ == "__main__":
     8%
     {
         opacity: 1.0;
-        position: 0px 58px 0px;
+        position: 0px 86px 0px;
     }
     90%
     {
         opacity: 1.0;
-        position: 0px 58px 0px;
-        transform: scale3d(1, 1, 1);
+        position: 0px 86px 0px;
     }
     100%
     {
         opacity: 0.0;
-        position: 0px 16px 0px;
-        transform: scale3d(2, 2, 1);
+        position: 0px 86px 0px;
+    }
+}
+
+@keyframes money-anim__add
+{
+    0%
+    {
+        opacity: 0.0;
+        position: 0px 18px 0px;
+    }
+    8%
+    {
+        opacity: 1.0;
+        position: 0px 18px 0px;
+    }
+    90%
+    {
+        opacity: 1.0;
+        position: 0px 18px 0px;
+    }
+    100%
+    {
+        opacity: 0.0;
+        position: 0px 58px 0px;
     }
 }'''
     
     import json
     
+    # Парсим конфигурацию отдельно
+    config = parseAnimationConfig(input_text)
+    print("Конфигурация анимаций:")
+    print(json.dumps(config, indent=4, ensure_ascii=False))
+    
+    print("\n" + "="*50 + "\n")
+    
+    # Парсим кейфреймы
     parsed = parseKeyframes(input_text)
-    print("Результат парсинга:")
+    print("Результат парсинга кейфреймов:")
     print(json.dumps(parsed, indent=4, ensure_ascii=False))
     
     print("\nОбратная генерация:")

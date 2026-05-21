@@ -8,8 +8,10 @@ Python script for generating keyframes for CSGO Panorama in 30FPS
 
 + Put your keyframes in css/keyframes.css
   
-+ Open terminal and do `python main.py <animation-duration> <animation-timing-function> <normal | flat>`
-  
++ Don't forget to your animation in comment section `/* <animation-name>: <duration> <timing-function> <normal | flat> */`
+
++ Run the main.py script or the main.exe
+
 + See in css/30FPSkeyframes.css
 
 ### Timing functions:

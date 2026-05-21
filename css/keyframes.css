@@ -1,3 +1,9 @@
+/*
+    money-anim__remove: 2.9 ease-in-out flat
+    money-anim__add: 2.9 ease-in-out flat
+    money-anim__addflash: 0.5 ease-out flat
+*/
+
 @keyframes money-anim__remove
 {
 	0%
@@ -20,4 +26,44 @@
 		opacity: 0.0;
         position: 0px 86px 0px;
 	}
+}
+
+@keyframes money-anim__add
+{
+	0%
+	{
+        opacity: 0.0;
+        position: 0px 18px 0px;
+    }
+    8%
+    {
+        opacity: 1.0;
+        position: 0px 18px 0px;
+    }
+    90%
+    {
+        opacity: 1.0;
+        position: 0px 18px 0px;
+    }
+	100%
+	{
+        opacity: 0.0;
+        position: 0px 58px 0px;
+	}
+}
+
+@keyframes money-anim__addflash
+{
+	0%
+	{
+		opacity: 1.0;
+        position: 36px 8px 0px;
+        transform: scale3d( 1, 1, 1 );
+    }
+    100%
+    {
+        opacity: 0.0;
+        position: 36px 32px 0px;
+        transform: scale3d( 2, 2, 1 );
+    }
 }
