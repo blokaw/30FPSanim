@@ -1,25 +1,23 @@
-@keyframes anim
+@keyframes money-anim__remove
 {
-    0%
-    {
+	0%
+	{
         opacity: 0.0;
         position: 0px 58px 0px;
     }
     8%
     {
         opacity: 1.0;
-        position: 0px 58px 0px;
+        position: 0px 86px 0px;
     }
     90%
     {
         opacity: 1.0;
-        position: 0px 58px 0px;
-        transform: scale3d(1, 1, 1);
+        position: 0px 86px 0px;
     }
-    100%
-    {
-        opacity: 0.0;
-        position: 0px 16px 0px;
-        transform: scale3d(2, 2, 1);
-    }
+	100%
+	{
+		opacity: 0.0;
+        position: 0px 86px 0px;
+	}
 }

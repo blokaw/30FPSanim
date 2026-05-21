@@ -30,44 +30,51 @@ def generateKeyframes(
     for prop in props:
         frames[prevKey].update(prop.buildFrame(prop.getFrom()))
 
-    for frame in range(1, timing.getFrameLen() + 1):
+    for frame_i in range(1, timing.getFrameLen() + 1):
         key = round( 
-            timing.getFrom() + frame * duration.getFrameStep(), 
+            timing.getFrom() + frame_i * duration.getFrameStep(), 
             TimingRange.ACCURACY
             )
         
+        NEW_VAL = False
+        frame = {}
+
         # Loop through props
         for prop_i in range(len(props)):
             prop = props[prop_i]
-            frameValues = []
+            frame[prop.getPropertyName()] = {
+                "value": [],
+                "mask": prop.getMask()
+            }
 
-            NEW_VAL = False
+            # Pointers
+            p_fValue = frame[prop.getPropertyName()]["value"]
+            p_prevFValue = frames[prevKey][prop.getPropertyName()]["value"]
+
             # Loop through values of prop
             for val_i in range(prop.getLen()):
-
+                
+                # If values are equal just save one of them
                 if prop.compareValues(val_i):
-                    frameValues.append(prop.getFrom()[val_i])
+                    p_fValue.append(prop.getFrom()[val_i])
                     continue
-                else:
-                    NEW_VAL = True
 
                 val = round( 
-                    prop.getFrom()[val_i] + prop.getDiff(val_i) * timingFunc(frame/timing.getFrameLen()), 
+                    prop.getFrom()[val_i] + prop.getDiff(val_i) * timingFunc(frame_i / timing.getFrameLen()), 
                     2 
                 )
 
-                if val == frames[prevKey][prop.getPropertyName()]["value"][val_i]:
-                    NEW_VAL = False
-                    continue
+                # The judge of Worthy frame
+                NEW_VAL = val != p_prevFValue[val_i]
 
-                frameValues.append(val)
+                p_fValue.append(val)
             
-            if NEW_VAL:
-                closeKey = round(key - 1 / 10**TimingRange.ACCURACY, TimingRange.ACCURACY)
-                frames[closeKey] = frames[prevKey]
+        if NEW_VAL:
+            closestKey = round(key - 1 / 10**TimingRange.ACCURACY, TimingRange.ACCURACY)
+            frames[closestKey] = frames[prevKey]
 
-                frames[key].update(prop.buildFrame(frameValues))
-        prevKey = key
+            frames[key] = frame
+            prevKey = key
 
     return frames
 

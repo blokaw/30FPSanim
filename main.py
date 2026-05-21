@@ -35,20 +35,22 @@ def compareProps(kfs, kf1, kf2) -> list[KfProperty]:
     MIN, MAX = sorted([kfs[kf1], kfs[kf2]], key=len)
 
     DIFF = []
+    NEW_VAL = False
     for i in list(MAX):
         if i not in MIN: continue
-
-        if MAX[i]["value"] != MIN[i]["value"]:
-            DIFF.append(
-                KfProperty(
-                    propName=i, 
-                    mask=MIN[i]["mask"], 
-                    fr=MIN[i]["value"], 
-                    to=MAX[i]["value"]
-                )
+        DIFF.append(
+            KfProperty(
+                propName=i, 
+                mask=MIN[i]["mask"], 
+                fr=MIN[i]["value"], 
+                to=MAX[i]["value"]
             )
+        )
+        if MAX[i]["value"] != MIN[i]["value"]:
+            NEW_VAL = True
+            
 
-    return DIFF
+    return DIFF if NEW_VAL else []
 
 
 def build30FPSKeyframes(_duration, _timingFunction):
