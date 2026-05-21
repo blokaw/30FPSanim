@@ -1,7 +1,7 @@
 #
 # (!) AI SLOP (!)                                           #
 # VIBE CODED IT BECAUSE WHY                                 #
-# WOULD I WASTE ALL MY OF TIME                              #
+# WOULD I WASTE ALL OF MY TIME                              #
 # DEBUGGING SOME PARSER THAT                                #
 # CAN BE DONE IN FEW MINUTES                                #
 # ========================================================  #
